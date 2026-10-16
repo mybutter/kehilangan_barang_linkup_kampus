@@ -53,6 +53,7 @@ function toReport(row, privateData = false) {
 function profileUser(user, profile) {
   return {
     id: user.id,
+    entityId: profile?.entity_id || "",
     name: profile?.name || user.user_metadata?.name || "Pengguna",
     nim: profile?.nim || user.user_metadata?.nim || "",
     email: user.email || profile?.email || "",
@@ -66,7 +67,7 @@ async function getUserContext() {
   const { data: { user }, error } = await supabase.auth.getUser();
   if (error) throw new Error(errorMessage(error, "Sesi tidak dapat diperiksa."));
   if (!user) return { user: null, profile: null };
-  const { data: profile, error: profileError } = await supabase.from("profiles").select("id,name,nim,username,study_program,role").eq("id", user.id).single();
+  const { data: profile, error: profileError } = await supabase.from("profiles").select("id,entity_id,name,nim,username,study_program,role").eq("id", user.id).single();
   if (profileError) throw new Error(errorMessage(profileError, "Profil pengguna tidak dapat dimuat."));
   return { user, profile };
 }
@@ -167,7 +168,8 @@ export async function api(url, options = {}) {
       });
       if (error) throw new Error(errorMessage(error, "Pendaftaran gagal."));
       if (!data.user) fail("Akun tidak berhasil dibuat.");
-      return { user: data.session ? profileUser(data.user, { name, nim, study_program: studyProgram, role: "student" }) : null };
+      const { profile } = data.session ? await getUserContext() : { profile: null };
+      return { user: data.session ? profileUser(data.user, profile) : null };
     }
 
     if (path === "/api/auth/login" && method === "POST") {
@@ -199,7 +201,7 @@ export async function api(url, options = {}) {
       if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) fail("Format email tidak valid.");
       const { error: authError } = email.trim() !== user.email ? await supabase.auth.updateUser({ email: email.trim() }) : { error: null };
       if (authError) throw new Error(errorMessage(authError, "Email tidak dapat diperbarui."));
-      const { data: updated, error } = await supabase.from("profiles").update({ name: name.trim(), study_program: studyProgram.trim() }).eq("id", user.id).select("id,name,nim,username,study_program,role").single();
+      const { data: updated, error } = await supabase.from("profiles").update({ name: name.trim(), study_program: studyProgram.trim() }).eq("id", user.id).select("id,entity_id,name,nim,username,study_program,role").single();
       if (error) throw new Error(errorMessage(error, "Profil tidak dapat diperbarui."));
       return { user: profileUser(user, updated) };
     }

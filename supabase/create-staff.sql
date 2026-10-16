@@ -9,7 +9,7 @@ where p.id = u.id
   and lower(u.email) = lower('staff@kampus.ac.id');
 
 -- Verifikasi:
-select p.id, u.email, p.name, p.role
+select p.id, p.entity_id, u.email, p.name, p.role
 from public.profiles p
 join auth.users u on u.id = p.id
 where lower(u.email) = lower('staff@kampus.ac.id');
