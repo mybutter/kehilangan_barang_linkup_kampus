@@ -446,7 +446,7 @@ create policy report_photos_owner_delete
 on storage.objects for delete to authenticated
 using (
   bucket_id = 'report-photos'
-  and (owner_id = auth.uid() or public.is_staff())
+  and (owner_id = auth.uid()::text or public.is_staff())
 );
 
 -- -------------------------------------------------------------
