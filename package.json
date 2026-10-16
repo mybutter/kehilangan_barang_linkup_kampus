@@ -1,0 +1,11 @@
+{
+  "name": "sistem-kehilangan-barang-uin-supabase",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Sistem Informasi Kehilangan Barang UIN Alauddin Makassar — Vercel + Supabase",
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve .",
+    "start": "npx serve ."
+  }
+}
